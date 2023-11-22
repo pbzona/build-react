@@ -1,3 +1,4 @@
+// Creates a virtual element to be manipulated in the FiberTree
 export function createElement(type, props, ...children) {
   return {
     type,
@@ -12,6 +13,7 @@ export function createElement(type, props, ...children) {
   };
 }
 
+// An alternate version of a virtual element that represents text, not a DOM node
 function _createTextElement(text) {
   return {
     type: 'TEXT_ELEMENT',

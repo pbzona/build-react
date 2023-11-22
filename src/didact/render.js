@@ -1,17 +1,31 @@
-export function render(element, container) {
+import { WorkManager, FiberTree } from './concurrent';
+
+// Translates the Fiber abstraction into real DOM nodes
+export function createDom(fiber) {
   const dom =
-    element.type == 'TEXT_ELEMENT'
+    fiber.type == 'TEXT_ELEMENT'
       ? document.createTextNode('')
-      : document.createElement(element.type);
+      : document.createElement(fiber.type);
 
   const isProperty = (key) => key !== 'children';
-  Object.keys(element.props)
+  Object.keys(fiber.props)
     .filter(isProperty)
     .forEach((name) => {
-      dom[name] = element.props[name];
+      dom[name] = fiber.props[name];
     });
 
-  element.props.children.forEach((child) => render(child, dom));
+  return dom;
+}
 
-  return container.appendChild(dom);
+// Entrypoint to the process by which JSX is translated and written to the DOM
+export function render(element, container) {
+  FiberTree.setWipRoot({
+    dom: container,
+    props: {
+      children: [element],
+    },
+  });
+
+  // Set the next unit of work - when the main thread is available, the workLoop will process it
+  WorkManager.setNextUnit(FiberTree.getWipRoot());
 }
